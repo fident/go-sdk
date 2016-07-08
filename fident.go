@@ -29,6 +29,16 @@ func InitWithPubKeyPath(pubKeyPath string) {
 	fidentPublicKey = key
 }
 
+// GetAuthStatus returns true if user is logged in else returns false
+func GetAuthStatus(req *http.Request) bool {
+	return !(GetIdentityID(req) == "")
+}
+
+// GetIdentityID returns the ID of currently authed identity
+func GetIdentityID(req *http.Request) string {
+	return req.Header.Get(getFidentIdentityIDHeaderKey())
+}
+
 // Verify that request is signed by fident
 func Verify(req *http.Request) bool {
 	if fidentPublicKey == nil {
@@ -62,10 +72,6 @@ func Verify(req *http.Request) bool {
 	return false
 }
 
-func getFidentSignatureHeaderKey() string {
-	return fidentHeaderPrefix + "-Signature"
-}
-
 // Loads fident public key into a memory
 func loadFidentPublicKey(path string) (*rsa.PublicKey, error) {
 	data, err := ioutil.ReadFile(path)
@@ -84,4 +90,16 @@ func loadFidentPublicKey(path string) (*rsa.PublicKey, error) {
 
 	rsaPubKey := publickey.(*rsa.PublicKey)
 	return rsaPubKey, nil
+}
+
+/**
+* Headers
+**/
+
+func getFidentSignatureHeaderKey() string {
+	return fidentHeaderPrefix + "-Signature"
+}
+
+func getFidentIdentityIDHeaderKey() string {
+	return fidentHeaderPrefix + "-Identity-Id"
 }
