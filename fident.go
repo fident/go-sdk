@@ -12,8 +12,6 @@ import (
 	"net/http"
 	"sort"
 	"strings"
-
-	"github.com/fortifi/fident/logging"
 )
 
 const fidentHeaderPrefix = "X-Fident"
@@ -21,12 +19,13 @@ const fidentHeaderPrefix = "X-Fident"
 var fidentPublicKey *rsa.PublicKey
 
 // InitWithPubKeyPath Inits fident client library with fident public key
-func InitWithPubKeyPath(pubKeyPath string) {
+func InitWithPubKeyPath(pubKeyPath string) error {
 	key, err := loadFidentPublicKey(pubKeyPath)
 	if err != nil {
-		logging.WriteError(err, true)
+		return err
 	}
 	fidentPublicKey = key
+	return nil
 }
 
 // GetAuthStatus returns true if user is logged in else returns false
@@ -51,11 +50,13 @@ func Verify(req *http.Request) bool {
 			keys = append(keys, k)
 		}
 	}
+
 	sort.Strings(keys)
 	message := req.RequestURI
 	for _, k := range keys {
 		message += k + req.Header.Get(k)
 	}
+
 	hash := sha256.New()
 	hash.Write([]byte(message))
 	hashResult := hash.Sum(nil)
@@ -80,7 +81,7 @@ func loadFidentPublicKey(path string) (*rsa.PublicKey, error) {
 	}
 	block, _ := pem.Decode(data)
 	if block == nil {
-		return nil, errors.New("No fident RSA key found")
+		return nil, errors.New("No Fident RSA key found")
 	}
 
 	publickey, err := x509.ParsePKIXPublicKey(block.Bytes)
@@ -93,7 +94,7 @@ func loadFidentPublicKey(path string) (*rsa.PublicKey, error) {
 }
 
 /**
-* Headers
+* Header Keys
 **/
 
 func getFidentSignatureHeaderKey() string {
