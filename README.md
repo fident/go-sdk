@@ -1,5 +1,5 @@
 # GoFident
-Fident client library for Go
+Fident client library for validation of GRPC traffic through portcullis.
 
 #### Init
 InitWithPubKeyPath(pubKeyPath)
