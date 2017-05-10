@@ -1,4 +1,4 @@
-# GoFident
+# go-sdk
 Fident client library for validation of GRPC traffic through portcullis.
 
 #### Init
